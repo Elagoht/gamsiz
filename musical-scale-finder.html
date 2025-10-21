@@ -161,6 +161,13 @@
             color: var(--text-secondary);
             font-weight: 500;
             transition: all 0.2s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .note-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px var(--shadow);
         }
 
         .note-badge.selected {
@@ -174,6 +181,16 @@
             color: white;
             font-weight: 600;
             transform: scale(1.1);
+        }
+
+        .note-badge.clicked {
+            animation: noteClick 0.3s ease;
+        }
+
+        @keyframes noteClick {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
         }
 
         .play-button {
@@ -387,7 +404,7 @@
             scalesList.innerHTML = matches.map((scale, index) => {
                 const notesHTML = scale.notes.map(note => {
                     const isSelected = selectedNotes.has(note);
-                    return `<span class="note-badge ${isSelected ? 'selected' : ''}" data-note="${note}" data-scale-index="${index}">${note}</span>`;
+                    return `<span class="note-badge ${isSelected ? 'selected' : ''}" data-note="${note}" data-scale-index="${index}" onclick="playNoteClick(event, '${note}')">${note}</span>`;
                 }).join('');
 
                 const isPlaying = currentlyPlayingIndex === index;
@@ -455,6 +472,19 @@
         // Stop the currently playing scale
         function stopScale() {
             shouldStop = true;
+        }
+
+        // Play a note when clicked on badge
+        async function playNoteClick(event, note) {
+            initAudioContext();
+            const badge = event.target;
+
+            // Add click animation
+            badge.classList.add('clicked');
+            setTimeout(() => badge.classList.remove('clicked'), 300);
+
+            // Play the note
+            await playNote(note, 0.4);
         }
 
         // Play a single note
