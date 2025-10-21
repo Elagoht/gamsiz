@@ -694,6 +694,10 @@
         transform: scale(1.3);
       }
 
+      .fretboard-scale .note-marker.clicked {
+        animation: noteClick 0.3s ease;
+      }
+
       .piano-keyboard-scale {
         background-color: var(--bg-secondary);
         border: 1px solid var(--border-color);
@@ -771,6 +775,22 @@
 
       .keyboard-scale .black-key.in-scale:hover {
         background-color: #1b5e20;
+      }
+
+      .keyboard-scale .key.clicked {
+        animation: keyClick 0.3s ease;
+      }
+
+      @keyframes keyClick {
+        0% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(2px);
+        }
+        100% {
+          transform: translateY(0);
+        }
       }
 
       @media (max-width: 600px) {
@@ -1330,8 +1350,16 @@
 
       // Select a scale for keyboard shortcuts
       function selectScale(event, index) {
-        // Don't select if clicking on a note badge
-        if (event.target.classList.contains("note-badge")) {
+        // Don't select if clicking on interactive elements
+        if (event.target.classList.contains("note-badge") ||
+            event.target.classList.contains("note-marker") ||
+            event.target.classList.contains("key") ||
+            event.target.classList.contains("key-label")) {
+          return;
+        }
+
+        // Prevent re-selecting the same scale (avoid unnecessary re-renders)
+        if (selectedScaleIndex === index) {
           return;
         }
 
