@@ -1238,41 +1238,90 @@
           const oscillator = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
 
-          // Guitar-like envelope
-          const attackTime = 0.002; // Slightly slower attack than piano
-          const decayTime = 0.2;    // Initial decay
-          const sustainLevel = 0.3; // Sustain level
-          const releaseTime = Math.max(0.1, duration - 0.3);
+          // Create filter for guitar tone shaping
+          const filter = audioContext.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = frequency * 8; // Bright tone
+          filter.Q.value = 2;
 
-          oscillator.connect(gainNode);
+          // Guitar-like envelope
+          const attackTime = 0.003; // Pick attack
+          const decayTime = 0.15;   // Initial decay
+          const sustainLevel = 0.25; // Sustain level
+          const releaseTime = Math.max(0.2, duration - 0.3);
+
+          oscillator.connect(filter);
+          filter.connect(gainNode);
           gainNode.connect(audioContext.destination);
 
-          // Use a mix of sawtooth and sine for guitar-like tone
+          // Use sawtooth for rich harmonic content (steel string sound)
           oscillator.type = "sawtooth";
           oscillator.frequency.value = frequency;
 
-          // Guitar envelope
+          // Guitar envelope (ADSR)
           gainNode.gain.setValueAtTime(0, now);
-          gainNode.gain.linearRampToValueAtTime(0.3, now + attackTime);
-          gainNode.gain.exponentialRampToValueAtTime(sustainLevel, now + decayTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
+          gainNode.gain.linearRampToValueAtTime(0.4, now + attackTime); // Pick attack
+          gainNode.gain.exponentialRampToValueAtTime(sustainLevel, now + decayTime); // Decay to sustain
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration); // Release
 
-          // Add slight vibrato for natural sound
+          // Add body resonance (low frequency boost)
+          const bodyOscillator = audioContext.createOscillator();
+          const bodyGain = audioContext.createGain();
+          const bodyFilter = audioContext.createBiquadFilter();
+
+          bodyFilter.type = 'lowpass';
+          bodyFilter.frequency.value = frequency * 2;
+
+          bodyOscillator.type = 'sine';
+          bodyOscillator.frequency.value = frequency / 2; // One octave lower for body
+
+          bodyOscillator.connect(bodyFilter);
+          bodyFilter.connect(bodyGain);
+          bodyGain.connect(gainNode);
+
+          bodyGain.gain.setValueAtTime(0, now);
+          bodyGain.gain.linearRampToValueAtTime(0.15, now + attackTime);
+          bodyGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+          // Add fret buzz and string noise (high frequency content)
+          const noiseOscillator = audioContext.createOscillator();
+          const noiseGain = audioContext.createGain();
+          const noiseFilter = audioContext.createBiquadFilter();
+
+          noiseFilter.type = 'highpass';
+          noiseFilter.frequency.value = frequency * 12;
+          noiseFilter.Q.value = 0.5;
+
+          noiseOscillator.type = 'square'; // Rich harmonics
+          noiseOscillator.frequency.value = frequency * 16; // High frequency noise
+
+          noiseOscillator.connect(noiseFilter);
+          noiseFilter.connect(noiseGain);
+          noiseGain.connect(gainNode);
+
+          noiseGain.gain.setValueAtTime(0.05, now);
+          noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05); // Quick decay for attack noise
+
+          // Add subtle vibrato for acoustic guitar feel
           const vibrato = audioContext.createOscillator();
           const vibratoGain = audioContext.createGain();
 
-          vibrato.frequency.value = 3; // 3Hz vibrato
-          vibratoGain.gain.value = 1; // 1 cent vibrato depth
+          vibrato.frequency.value = 4.5; // 4.5Hz vibrato
+          vibratoGain.gain.value = 3; // 3 cents vibrato depth
 
           vibrato.connect(vibratoGain);
           vibratoGain.connect(oscillator.frequency);
 
-          // Start sound
+          // Start all oscillators
           oscillator.start(now);
+          bodyOscillator.start(now);
+          noiseOscillator.start(now);
           vibrato.start(now);
 
-          // Stop sound
+          // Stop all oscillators
           oscillator.stop(now + duration);
+          bodyOscillator.stop(now + duration);
+          noiseOscillator.stop(now + duration);
           vibrato.stop(now + duration);
 
           oscillator.onended = resolve;
@@ -1393,57 +1442,135 @@
           const oscillator = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
 
-          // Piano-like envelope
-          const attackTime = 0.001; // Very sharp attack like piano hammer
-          const decayTime = 0.3;    // Initial decay
-          const sustainLevel = 0.2; // Sustain level
-          const releaseTime = Math.max(0.1, duration - 0.4); // Remaining time for release
+          // Create filter for piano tone shaping
+          const filter = audioContext.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = frequency * 6; // Warmer tone than guitar
+          filter.Q.value = 1;
 
-          oscillator.connect(gainNode);
+          // Piano-like envelope (hammer strike and sustain)
+          const attackTime = 0.001; // Immediate hammer attack
+          const decayTime = 0.25;   // Initial decay
+          const sustainLevel = 0.15; // Lower sustain (damper effect)
+          const releaseTime = Math.max(0.3, duration - 0.35); // Longer release
+
+          oscillator.connect(filter);
+          filter.connect(gainNode);
           gainNode.connect(audioContext.destination);
 
-          // Use a mix of sawtooth and sine for richer tone
+          // Use triangle wave for fundamental (mellow piano tone)
           oscillator.type = "triangle";
           oscillator.frequency.value = frequency;
 
-          // Piano envelope
+          // Piano envelope with hammer strike simulation
           gainNode.gain.setValueAtTime(0, now);
-          gainNode.gain.linearRampToValueAtTime(0.4, now + attackTime); // Sharp attack
+          gainNode.gain.linearRampToValueAtTime(0.6, now + attackTime); // Hammer impact
           gainNode.gain.exponentialRampToValueAtTime(sustainLevel, now + decayTime); // Decay to sustain
-          gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration); // Release
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration); // Release
 
-          // Add slight vibrato for natural sound
-          const vibrato = audioContext.createOscillator();
-          const vibratoGain = audioContext.createGain();
+          // Add hammer noise (attack transient)
+          const hammerNoise = audioContext.createOscillator();
+          const hammerGain = audioContext.createGain();
+          const hammerFilter = audioContext.createBiquadFilter();
 
-          vibrato.frequency.value = 4; // 4Hz vibrato
-          vibratoGain.gain.value = 2; // 2 cents vibrato depth
+          hammerFilter.type = 'highpass';
+          hammerFilter.frequency.value = frequency * 20;
+          hammerFilter.Q.value = 0.3;
 
-          vibrato.connect(vibratoGain);
-          vibratoGain.connect(oscillator.frequency);
+          hammerNoise.type = 'square'; // Rich harmonic content
+          hammerNoise.frequency.value = frequency * 25; // High frequency noise
 
-          // Start sound
-          oscillator.start(now);
-          vibrato.start(now);
+          hammerNoise.connect(hammerFilter);
+          hammerFilter.connect(hammerGain);
+          hammerGain.connect(gainNode);
 
-          // Stop sound
-          oscillator.stop(now + duration);
-          vibrato.stop(now + duration);
+          hammerGain.gain.setValueAtTime(0.1, now);
+          hammerGain.gain.exponentialRampToValueAtTime(0.001, now + 0.03); // Very quick decay
 
-          // Add harmonic partials for piano richness
+          // Add sympathetic resonance (string vibration simulation)
+          const resonanceOscillator = audioContext.createOscillator();
+          const resonanceGain = audioContext.createGain();
+          const resonanceFilter = audioContext.createBiquadFilter();
+
+          resonanceFilter.type = 'bandpass';
+          resonanceFilter.frequency.value = frequency * 3;
+          resonanceFilter.Q.value = 8; // Narrow band for resonance
+
+          resonanceOscillator.type = 'sine';
+          resonanceOscillator.frequency.value = frequency * 1.003; // Slightly detuned
+
+          resonanceOscillator.connect(resonanceFilter);
+          resonanceFilter.connect(resonanceGain);
+          resonanceGain.connect(gainNode);
+
+          resonanceGain.gain.setValueAtTime(0, now);
+          resonanceGain.gain.linearRampToValueAtTime(0.08, now + 0.01); // Delayed resonance
+          resonanceGain.gain.exponentialRampToValueAtTime(0.02, now + duration);
+
+          // Add harmonic partials (overtones for piano richness)
           const harmonic1 = audioContext.createOscillator();
           const harmonicGain1 = audioContext.createGain();
 
           harmonic1.type = "sine";
           harmonic1.frequency.value = frequency * 2; // Octave
           harmonicGain1.gain.setValueAtTime(0, now);
-          harmonicGain1.gain.linearRampToValueAtTime(0.15, now + attackTime);
-          harmonicGain1.gain.exponentialRampToValueAtTime(0.01, now + duration);
+          harmonicGain1.gain.linearRampToValueAtTime(0.2, now + attackTime);
+          harmonicGain1.gain.exponentialRampToValueAtTime(0.03, now + duration);
 
           harmonic1.connect(harmonicGain1);
-          harmonicGain1.connect(audioContext.destination);
+          harmonicGain1.connect(gainNode);
+
+          const harmonic2 = audioContext.createOscillator();
+          const harmonicGain2 = audioContext.createGain();
+
+          harmonic2.type = "sine";
+          harmonic2.frequency.value = frequency * 3; // Fifth above octave
+          harmonicGain2.gain.setValueAtTime(0, now);
+          harmonicGain2.gain.linearRampToValueAtTime(0.12, now + attackTime);
+          harmonicGain2.gain.exponentialRampToValueAtTime(0.02, now + duration);
+
+          harmonic2.connect(harmonicGain2);
+          harmonicGain2.connect(gainNode);
+
+          const harmonic3 = audioContext.createOscillator();
+          const harmonicGain3 = audioContext.createGain();
+
+          harmonic3.type = "sine";
+          harmonic3.frequency.value = frequency * 4; // Two octaves
+          harmonicGain3.gain.setValueAtTime(0, now);
+          harmonicGain3.gain.linearRampToValueAtTime(0.08, now + attackTime);
+          harmonicGain3.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+          harmonic3.connect(harmonicGain3);
+          harmonicGain3.connect(gainNode);
+
+          // Add subtle vibrato for acoustic piano feel
+          const vibrato = audioContext.createOscillator();
+          const vibratoGain = audioContext.createGain();
+
+          vibrato.frequency.value = 3.5; // Slower vibrato than guitar
+          vibratoGain.gain.value = 1; // 1 cent vibrato depth (subtle)
+
+          vibrato.connect(vibratoGain);
+          vibratoGain.connect(oscillator.frequency);
+
+          // Start all oscillators
+          oscillator.start(now);
+          hammerNoise.start(now);
+          resonanceOscillator.start(now);
           harmonic1.start(now);
+          harmonic2.start(now);
+          harmonic3.start(now);
+          vibrato.start(now);
+
+          // Stop all oscillators
+          oscillator.stop(now + duration);
+          hammerNoise.stop(now + duration);
+          resonanceOscillator.stop(now + duration);
           harmonic1.stop(now + duration);
+          harmonic2.stop(now + duration);
+          harmonic3.stop(now + duration);
+          vibrato.stop(now + duration);
 
           oscillator.onended = resolve;
         });
