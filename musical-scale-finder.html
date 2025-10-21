@@ -638,6 +638,43 @@
         playNote(note, 0.4);
       }
 
+      // Handle arrow key navigation
+      function handleKeyDown(event) {
+        if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+          return;
+        }
+
+        if (!window.currentMatches || window.currentMatches.length === 0) {
+          return;
+        }
+
+        event.preventDefault();
+
+        const totalScales = window.currentMatches.length;
+
+        if (event.key === "ArrowDown") {
+          if (selectedScaleIndex === null) {
+            selectedScaleIndex = 0;
+          } else {
+            selectedScaleIndex = (selectedScaleIndex + 1) % totalScales;
+          }
+        } else if (event.key === "ArrowUp") {
+          if (selectedScaleIndex === null) {
+            selectedScaleIndex = totalScales - 1;
+          } else {
+            selectedScaleIndex = (selectedScaleIndex - 1 + totalScales) % totalScales;
+          }
+        }
+
+        updateScales();
+
+        // Scroll selected scale into view and center it
+        const selectedElement = document.querySelector('.scale-item.selected');
+        if (selectedElement) {
+          selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+
       // Play a single note
       function playNote(note, duration) {
         return new Promise((resolve) => {
@@ -675,8 +712,9 @@
       // Initialize
       createNoteGrid();
 
-      // Add keyboard event listener
+      // Add keyboard event listeners
       document.addEventListener("keypress", handleKeyPress);
+      document.addEventListener("keydown", handleKeyDown);
     </script>
   </body>
 </html>
