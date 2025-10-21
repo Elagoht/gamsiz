@@ -675,30 +675,67 @@
         }
       }
 
-      // Play a single note
+      // Play a single note with piano-like synthesis
       function playNote(note, duration) {
         return new Promise((resolve) => {
+          const now = audioContext.currentTime;
+          const frequency = NOTE_FREQUENCIES[note];
+
+          // Create main oscillator (fundamental)
           const oscillator = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
+
+          // Piano-like envelope
+          const attackTime = 0.001; // Very sharp attack like piano hammer
+          const decayTime = 0.3;    // Initial decay
+          const sustainLevel = 0.2; // Sustain level
+          const releaseTime = Math.max(0.1, duration - 0.4); // Remaining time for release
 
           oscillator.connect(gainNode);
           gainNode.connect(audioContext.destination);
 
-          oscillator.frequency.value = NOTE_FREQUENCIES[note];
-          oscillator.type = "sine";
+          // Use a mix of sawtooth and sine for richer tone
+          oscillator.type = "triangle";
+          oscillator.frequency.value = frequency;
 
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(
-            0.3,
-            audioContext.currentTime + 0.01
-          );
-          gainNode.gain.exponentialRampToValueAtTime(
-            0.01,
-            audioContext.currentTime + duration
-          );
+          // Piano envelope
+          gainNode.gain.setValueAtTime(0, now);
+          gainNode.gain.linearRampToValueAtTime(0.4, now + attackTime); // Sharp attack
+          gainNode.gain.exponentialRampToValueAtTime(sustainLevel, now + decayTime); // Decay to sustain
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration); // Release
 
-          oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + duration);
+          // Add slight vibrato for natural sound
+          const vibrato = audioContext.createOscillator();
+          const vibratoGain = audioContext.createGain();
+
+          vibrato.frequency.value = 4; // 4Hz vibrato
+          vibratoGain.gain.value = 2; // 2 cents vibrato depth
+
+          vibrato.connect(vibratoGain);
+          vibratoGain.connect(oscillator.frequency);
+
+          // Start sound
+          oscillator.start(now);
+          vibrato.start(now);
+
+          // Stop sound
+          oscillator.stop(now + duration);
+          vibrato.stop(now + duration);
+
+          // Add harmonic partials for piano richness
+          const harmonic1 = audioContext.createOscillator();
+          const harmonicGain1 = audioContext.createGain();
+
+          harmonic1.type = "sine";
+          harmonic1.frequency.value = frequency * 2; // Octave
+          harmonicGain1.gain.setValueAtTime(0, now);
+          harmonicGain1.gain.linearRampToValueAtTime(0.15, now + attackTime);
+          harmonicGain1.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+          harmonic1.connect(harmonicGain1);
+          harmonicGain1.connect(audioContext.destination);
+          harmonic1.start(now);
+          harmonic1.stop(now + duration);
 
           oscillator.onended = resolve;
         });
