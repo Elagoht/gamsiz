@@ -434,7 +434,7 @@
       }
 
       .white-key {
-        width: 40px;
+        width: 50px;
         height: 120px;
         background-color: white;
         border: 1px solid var(--border-color);
@@ -463,7 +463,7 @@
       }
 
       .black-key {
-        width: 28px;
+        width: 35px;
         height: 80px;
         background-color: #333;
         border-radius: 0 0 3px 3px;
@@ -651,7 +651,7 @@
         font-weight: 600;
         color: var(--text-primary);
         z-index: 1;
-        min-width: 25px; /* Ensure minimum width for touch targets */
+        min-width: 35px; /* Ensure minimum width for touch targets */
       }
 
       .keyboard-scale .white-key:hover {
@@ -668,7 +668,7 @@
       }
 
       .keyboard-scale .black-key {
-        width: 18px;
+        width: 25px;
         height: 75px;
         background-color: #333;
         border-radius: 0 0 2px 2px;
@@ -1358,11 +1358,18 @@
 
         keyboard.innerHTML = '';
 
-        // Create one octave
+        // Create one octave with correct chromatic sequence
         const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-        const blackKeys = ['C#', 'D#', null, 'F#', 'G#', 'A#'];
-        // Precise black key positions between white keys
-        const blackKeyPositions = [0.85, 1.85, 3.85, 4.85, 5.85]; // More accurate positioning
+
+        // Define black keys with their positions between white keys
+        // C# between C-D, D# between D-E, F# between F-G, G# between G-A, A# between A-B
+        const blackKeysMap = [
+          { note: 'C#', between: [0, 1] }, // Between C (0) and D (1)
+          { note: 'D#', between: [1, 2] }, // Between D (1) and E (2)
+          { note: 'F#', between: [3, 4] }, // Between F (3) and G (4)
+          { note: 'G#', between: [4, 5] }, // Between G (4) and A (5)
+          { note: 'A#', between: [5, 6] }, // Between A (5) and B (6)
+        ];
 
         // Create white keys
         whiteKeys.forEach((note, index) => {
@@ -1383,31 +1390,43 @@
         });
 
         // Create black keys (positioned absolutely)
-        blackKeyPositions.forEach((position, index) => {
-          if (blackKeys[index]) {
+        setTimeout(() => {
+          const whiteKeyElements = keyboard.querySelectorAll('.white-key');
+          const blackKeyWidth = window.innerWidth <= 600 ? 25 : 35; // Updated widths for better usability
+
+          blackKeysMap.forEach((blackKeyData) => {
             const blackKey = document.createElement('div');
             blackKey.className = 'key black-key';
-            const note = blackKeys[index];
 
-            // Position black keys precisely between white keys
-            // C# between C-D, D# between D-E, F# between F-G, G# between G-A, A# between A-B
-            const whiteKeyWidth = keyboard.offsetWidth / 7; // Total width divided by 7 white keys
-            const blackKeyWidth = window.innerWidth <= 600 ? 14 : 18; // Smaller on mobile
-            blackKey.style.left = `${(position * whiteKeyWidth) - (blackKeyWidth / 2)}px`; // Center the black key
+            // Get the white keys this black key sits between
+            const leftWhiteKey = whiteKeyElements[blackKeyData.between[0]];
+            const rightWhiteKey = whiteKeyElements[blackKeyData.between[1]];
 
-            if (scaleNotes.includes(note)) {
+            if (leftWhiteKey && rightWhiteKey) {
+              const leftPosition = leftWhiteKey.offsetLeft;
+              const rightPosition = rightWhiteKey.offsetLeft;
+              const whiteKeyWidth = leftWhiteKey.offsetWidth;
+
+              // Position the black key so it overlaps slightly with both adjacent white keys
+              // This is how real pianos work - black keys sit between white keys
+              const blackKeyPosition = leftPosition + whiteKeyWidth - (blackKeyWidth / 2);
+
+              blackKey.style.left = `${blackKeyPosition}px`;
+            }
+
+            if (scaleNotes.includes(blackKeyData.note)) {
               blackKey.classList.add('in-scale');
             }
 
             const label = document.createElement('div');
             label.className = 'key-label';
-            label.textContent = note;
+            label.textContent = blackKeyData.note;
             blackKey.appendChild(label);
 
-            blackKey.onclick = () => playNoteClick({ target: blackKey }, note);
+            blackKey.onclick = () => playNoteClick({ target: blackKey }, blackKeyData.note);
             keyboard.appendChild(blackKey);
-          }
-        });
+          });
+        }, 0);
       }
 
       // Update instrument visualizations
