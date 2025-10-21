@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Musical Scale Finder</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-note: #e0e0e0;
+            --bg-note-active: #4CAF50;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --border-color: #bdbdbd;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --play-btn-bg: #2196F3;
+            --play-btn-hover: #1976D2;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #1a1a1a;
+                --bg-secondary: #2d2d2d;
+                --bg-note: #3a3a3a;
+                --bg-note-active: #4CAF50;
+                --text-primary: #e0e0e0;
+                --text-secondary: #a0a0a0;
+                --border-color: #4a4a4a;
+                --shadow: rgba(0, 0, 0, 0.3);
+                --play-btn-bg: #2196F3;
+                --play-btn-hover: #1976D2;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .note-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .note-button {
+            aspect-ratio: 1;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-note);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .note-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .note-button.active {
+            background-color: var(--bg-note-active);
+            color: white;
+            border-color: var(--bg-note-active);
+        }
+
+        .scales-section {
+            margin-top: 30px;
+        }
+
+        .scales-header {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .no-scales {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 40px;
+            font-size: 1rem;
+        }
+
+        .scale-item {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: box-shadow 0.2s;
+        }
+
+        .scale-item:hover {
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .scale-info {
+            flex: 1;
+        }
+
+        .scale-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .scale-notes {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .note-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: var(--bg-note);
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .note-badge.selected {
+            background-color: var(--bg-note-active);
+            color: white;
+            font-weight: 600;
+        }
+
+        .note-badge.playing {
+            background-color: #9C27B0;
+            color: white;
+            font-weight: 600;
+            transform: scale(1.1);
+        }
+
+        .play-button {
+            background-color: var(--play-btn-bg);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .play-button:hover {
+            background-color: var(--play-btn-hover);
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .play-button.playing {
+            background-color: #f44336;
+            cursor: pointer;
+        }
+
+        .play-button.playing:hover {
+            background-color: #d32f2f;
+        }
+
+        @media (max-width: 600px) {
+            .note-grid {
+                gap: 8px;
+            }
+
+            .note-button {
+                font-size: 0.85rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .scale-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .play-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Musical Scale Finder</h1>
+        <p class="subtitle">Select at least 3 notes to find matching scales</p>
+
+        <div class="note-grid" id="noteGrid"></div>
+
+        <div class="scales-section" id="scalesSection">
+            <h2 class="scales-header">Matching Scales</h2>
+            <div id="scalesList">
+                <div class="no-scales">Select 3 or more notes to see matching scales</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+        // Define scales as intervals from root note (in semitones)
+        const SCALES = {
+            'Major (Ionian)': [0, 2, 4, 5, 7, 9, 11],
+            'Natural Minor (Aeolian)': [0, 2, 3, 5, 7, 8, 10],
+            'Harmonic Minor': [0, 2, 3, 5, 7, 8, 11],
+            'Melodic Minor': [0, 2, 3, 5, 7, 9, 11],
+            'Dorian': [0, 2, 3, 5, 7, 9, 10],
+            'Phrygian': [0, 1, 3, 5, 7, 8, 10],
+            'Lydian': [0, 2, 4, 6, 7, 9, 11],
+            'Mixolydian': [0, 2, 4, 5, 7, 9, 10],
+            'Locrian': [0, 1, 3, 5, 6, 8, 10],
+            'Major Pentatonic': [0, 2, 4, 7, 9],
+            'Minor Pentatonic': [0, 3, 5, 7, 10],
+            'Blues': [0, 3, 5, 6, 7, 10],
+            'Whole Tone': [0, 2, 4, 6, 8, 10],
+            'Chromatic': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        };
+
+        // Note frequencies (A4 = 440Hz)
+        const NOTE_FREQUENCIES = {
+            'C': 261.63,
+            'C#': 277.18,
+            'D': 293.66,
+            'D#': 311.13,
+            'E': 329.63,
+            'F': 349.23,
+            'F#': 369.99,
+            'G': 392.00,
+            'G#': 415.30,
+            'A': 440.00,
+            'A#': 466.16,
+            'B': 493.88
+        };
+
+        let selectedNotes = new Set();
+        let audioContext = null;
+        let currentlyPlayingIndex = null;
+        let shouldStop = false;
+
+        // Initialize audio context on first user interaction
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Create note grid
+        function createNoteGrid() {
+            const noteGrid = document.getElementById('noteGrid');
+            NOTES.forEach(note => {
+                const button = document.createElement('button');
+                button.className = 'note-button';
+                button.textContent = note;
+                button.dataset.note = note;
+                button.addEventListener('click', toggleNote);
+                noteGrid.appendChild(button);
+            });
+        }
+
+        // Toggle note selection
+        function toggleNote(event) {
+            initAudioContext();
+            const note = event.target.dataset.note;
+            const button = event.target;
+
+            if (selectedNotes.has(note)) {
+                selectedNotes.delete(note);
+                button.classList.remove('active');
+            } else {
+                selectedNotes.add(note);
+                button.classList.add('active');
+            }
+
+            updateScales();
+        }
+
+        // Get note index
+        function getNoteIndex(note) {
+            return NOTES.indexOf(note);
+        }
+
+        // Check if selected notes match a scale
+        function matchesScale(selectedIndices, scaleIntervals, rootIndex) {
+            const scaleNotes = scaleIntervals.map(interval => (rootIndex + interval) % 12);
+            return selectedIndices.every(index => scaleNotes.includes(index));
+        }
+
+        // Find all matching scales
+        function findMatchingScales() {
+            if (selectedNotes.size < 3) {
+                return [];
+            }
+
+            const selectedIndices = Array.from(selectedNotes).map(getNoteIndex);
+            const matches = [];
+
+            // Try each note as root
+            for (let rootIndex = 0; rootIndex < 12; rootIndex++) {
+                const rootNote = NOTES[rootIndex];
+
+                // Check each scale type
+                for (const [scaleName, intervals] of Object.entries(SCALES)) {
+                    if (matchesScale(selectedIndices, intervals, rootIndex)) {
+                        const scaleNotes = intervals.map(interval =>
+                            NOTES[(rootIndex + interval) % 12]
+                        );
+                        matches.push({
+                            name: `${rootNote} ${scaleName}`,
+                            notes: scaleNotes,
+                            root: rootNote
+                        });
+                    }
+                }
+            }
+
+            return matches;
+        }
+
+        // Update scales display
+        function updateScales() {
+            const scalesList = document.getElementById('scalesList');
+            const matches = findMatchingScales();
+
+            if (matches.length === 0) {
+                if (selectedNotes.size < 3) {
+                    scalesList.innerHTML = '<div class="no-scales">Select 3 or more notes to see matching scales</div>';
+                } else {
+                    scalesList.innerHTML = '<div class="no-scales">No matching scales found</div>';
+                }
+                return;
+            }
+
+            scalesList.innerHTML = matches.map((scale, index) => {
+                const notesHTML = scale.notes.map(note => {
+                    const isSelected = selectedNotes.has(note);
+                    return `<span class="note-badge ${isSelected ? 'selected' : ''}" data-note="${note}" data-scale-index="${index}">${note}</span>`;
+                }).join('');
+
+                const isPlaying = currentlyPlayingIndex === index;
+                const buttonText = isPlaying ? '⏹ Stop' : '▶ Play';
+                const buttonClass = isPlaying ? 'play-button playing' : 'play-button';
+                const buttonAction = isPlaying ? 'stopScale()' : `playScale(${index})`;
+
+                return `
+                    <div class="scale-item">
+                        <div class="scale-info">
+                            <div class="scale-name">${scale.name}</div>
+                            <div class="scale-notes">${notesHTML}</div>
+                        </div>
+                        <button class="${buttonClass}" onclick="${buttonAction}">
+                            ${buttonText}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            // Store matches for playback
+            window.currentMatches = matches;
+        }
+
+        // Play a scale
+        async function playScale(index) {
+            initAudioContext();
+            const scale = window.currentMatches[index];
+
+            if (currentlyPlayingIndex !== null) {
+                return;
+            }
+
+            currentlyPlayingIndex = index;
+            shouldStop = false;
+            updateScales();
+
+            for (const note of scale.notes) {
+                if (shouldStop) {
+                    break;
+                }
+
+                // Highlight the current note
+                const noteBadge = document.querySelector(`.note-badge[data-note="${note}"][data-scale-index="${index}"]`);
+                if (noteBadge) {
+                    noteBadge.classList.add('playing');
+                }
+
+                await playNote(note, 0.3);
+
+                // Remove highlight from the current note
+                if (noteBadge) {
+                    noteBadge.classList.remove('playing');
+                }
+
+                if (!shouldStop) {
+                    await sleep(350);
+                }
+            }
+
+            currentlyPlayingIndex = null;
+            updateScales();
+        }
+
+        // Stop the currently playing scale
+        function stopScale() {
+            shouldStop = true;
+        }
+
+        // Play a single note
+        function playNote(note, duration) {
+            return new Promise(resolve => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = NOTE_FREQUENCIES[note];
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+
+                oscillator.onended = resolve;
+            });
+        }
+
+        // Sleep utility
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Initialize
+        createNoteGrid();
+    </script>
+</body>
+</html>
