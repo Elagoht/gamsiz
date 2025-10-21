@@ -651,6 +651,7 @@
         font-weight: 600;
         color: var(--text-primary);
         z-index: 1;
+        min-width: 25px; /* Ensure minimum width for touch targets */
       }
 
       .keyboard-scale .white-key:hover {
@@ -667,7 +668,7 @@
       }
 
       .keyboard-scale .black-key {
-        width: 28px;
+        width: 18px;
         height: 75px;
         background-color: #333;
         border-radius: 0 0 2px 2px;
@@ -677,9 +678,10 @@
         align-items: flex-end;
         justify-content: center;
         padding-bottom: 4px;
-        font-size: 0.55rem;
+        font-size: 0.5rem;
         font-weight: 600;
         color: white;
+        max-width: 70%; /* Ensure black keys don't overflow on mobile */
       }
 
       .keyboard-scale .black-key:hover {
@@ -728,7 +730,20 @@
         }
 
         .keyboard-scale {
-          min-width: 400px;
+          min-width: auto; /* Remove min-width on mobile */
+          height: 80px; /* Reduce height on mobile */
+        }
+
+        .keyboard-scale .white-key {
+          height: 80px;
+          font-size: 0.6rem;
+          padding-bottom: 4px;
+        }
+
+        .keyboard-scale .black-key {
+          height: 50px;
+          font-size: 0.45rem;
+          padding-bottom: 2px;
         }
       }
     </style>
@@ -1377,7 +1392,8 @@
             // Position black keys precisely between white keys
             // C# between C-D, D# between D-E, F# between F-G, G# between G-A, A# between A-B
             const whiteKeyWidth = keyboard.offsetWidth / 7; // Total width divided by 7 white keys
-            blackKey.style.left = `${(position * whiteKeyWidth) - 8}px`; // Move 28px black key a bit right
+            const blackKeyWidth = window.innerWidth <= 600 ? 14 : 18; // Smaller on mobile
+            blackKey.style.left = `${(position * whiteKeyWidth) - (blackKeyWidth / 2)}px`; // Center the black key
 
             if (scaleNotes.includes(note)) {
               blackKey.classList.add('in-scale');
