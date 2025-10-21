@@ -127,11 +127,15 @@
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 12px;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+
+      .scale-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        transition: all 0.2s;
-        cursor: pointer;
+        margin-bottom: 15px;
       }
 
       .scale-item:hover {
@@ -271,6 +275,425 @@
         background-color: #d32f2f;
       }
 
+      /* Instrument Visualization Styles */
+      .instrument-section {
+        margin-top: 30px;
+        display: none;
+      }
+
+      .instrument-section.active {
+        display: block;
+      }
+
+      .instrument-header {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+      }
+
+      /* Guitar Fretboard Styles */
+      .guitar-fretboard {
+        background-color: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+      }
+
+      .fretboard {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 800px;
+      }
+
+      .string {
+        display: flex;
+        align-items: center;
+        height: 40px;
+        position: relative;
+      }
+
+      .string-label {
+        position: absolute;
+        left: -30px;
+        width: 25px;
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .string-line {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: var(--border-color);
+        z-index: 1;
+      }
+
+      .fret {
+        flex: 1;
+        min-width: 60px;
+        height: 40px;
+        border-right: 3px solid var(--border-color);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+      }
+
+      .fret:nth-child(3n) {
+        border-right-width: 5px;
+        border-color: #999;
+      }
+
+      .fret-number {
+        position: absolute;
+        bottom: -20px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .note-marker {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background-color: var(--bg-note);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s;
+        z-index: 3;
+      }
+
+      .note-marker.in-scale {
+        background-color: var(--bg-note-active);
+        color: white;
+        border-color: var(--bg-note-active);
+        transform: scale(1.1);
+      }
+
+      .note-marker:hover {
+        transform: scale(1.2);
+        box-shadow: 0 2px 8px var(--shadow);
+      }
+
+      .note-marker.in-scale:hover {
+        transform: scale(1.3);
+      }
+
+      .fret-markers {
+        position: absolute;
+        top: 10px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-around;
+        pointer-events: none;
+      }
+
+      .fret-marker {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--border-color);
+      }
+
+      /* Piano Keys Styles */
+      .piano-keyboard {
+        background-color: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        overflow-x: auto;
+      }
+
+      .keyboard {
+        display: flex;
+        min-width: 700px;
+        height: 120px;
+        position: relative;
+      }
+
+      .key {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.1s;
+      }
+
+      .white-key {
+        width: 40px;
+        height: 120px;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0 0 4px 4px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        z-index: 1;
+      }
+
+      .white-key:hover {
+        background-color: #f0f0f0;
+      }
+
+      .white-key.in-scale {
+        background-color: var(--bg-note-active);
+        color: white;
+      }
+
+      .white-key.in-scale:hover {
+        background-color: #45a049;
+      }
+
+      .black-key {
+        width: 28px;
+        height: 80px;
+        background-color: #333;
+        border-radius: 0 0 3px 3px;
+        position: absolute;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 6px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .black-key:hover {
+        background-color: #555;
+      }
+
+      .black-key.in-scale {
+        background-color: #2196f3;
+      }
+
+      .black-key.in-scale:hover {
+        background-color: #1976d2;
+      }
+
+      .key:active {
+        transform: translateY(1px);
+      }
+
+      .key-label {
+        pointer-events: none;
+        user-select: none;
+      }
+
+      /* Scale Instrument Styles */
+      .scale-instruments {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid var(--border-color);
+        width: 100%;
+      }
+
+      .instruments-row {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+      }
+
+      .instrument-wrapper {
+        flex: 1;
+        min-width: 0; /* Allows flex items to shrink properly */
+      }
+
+      .instrument-header-scale {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+      }
+
+      .guitar-fretboard-scale {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 12px;
+        overflow-x: auto;
+      }
+
+      .fretboard-scale {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 600px;
+      }
+
+      .fretboard-scale .string {
+        display: flex;
+        align-items: center;
+        height: 30px;
+        position: relative;
+      }
+
+      .fretboard-scale .string-label {
+        position: absolute;
+        left: -25px;
+        width: 20px;
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+      }
+
+      .fretboard-scale .string-line {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: var(--border-color);
+        z-index: 1;
+      }
+
+      .fretboard-scale .fret {
+        flex: 1;
+        min-width: 45px;
+        height: 30px;
+        border-right: 2px solid var(--border-color);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+      }
+
+      .fretboard-scale .fret:nth-child(3n) {
+        border-right-width: 3px;
+        border-color: #999;
+      }
+
+      .fretboard-scale .note-marker {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: var(--bg-note);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s;
+        z-index: 3;
+      }
+
+      .fretboard-scale .note-marker.in-scale {
+        background-color: var(--bg-note-active);
+        color: white;
+        border-color: var(--bg-note-active);
+        transform: scale(1.1);
+      }
+
+      .fretboard-scale .note-marker:hover {
+        transform: scale(1.2);
+        box-shadow: 0 2px 6px var(--shadow);
+      }
+
+      .fretboard-scale .note-marker.in-scale:hover {
+        transform: scale(1.3);
+      }
+
+      .piano-keyboard-scale {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 12px;
+      }
+
+      .keyboard-scale {
+        display: flex;
+        width: 100%;
+        height: 120px;
+        position: relative;
+      }
+
+      .keyboard-scale .key {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.1s;
+      }
+
+      .keyboard-scale .white-key {
+        flex: 1;
+        height: 120px;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0 0 3px 3px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        z-index: 1;
+      }
+
+      .keyboard-scale .white-key:hover {
+        background-color: #f0f0f0;
+      }
+
+      .keyboard-scale .white-key.in-scale {
+        background-color: var(--bg-note-active);
+        color: white;
+      }
+
+      .keyboard-scale .white-key.in-scale:hover {
+        background-color: #45a049;
+      }
+
+      .keyboard-scale .black-key {
+        width: 28px;
+        height: 75px;
+        background-color: #333;
+        border-radius: 0 0 2px 2px;
+        position: absolute;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 4px;
+        font-size: 0.55rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .keyboard-scale .black-key:hover {
+        background-color: #555;
+      }
+
+      .keyboard-scale .black-key.in-scale {
+        background-color: #2196f3;
+      }
+
+      .keyboard-scale .black-key.in-scale:hover {
+        background-color: #1976d2;
+      }
+
       @media (max-width: 600px) {
         .note-grid {
           gap: 8px;
@@ -284,7 +707,7 @@
           font-size: 1.5rem;
         }
 
-        .scale-item {
+        .scale-content {
           flex-direction: column;
           align-items: flex-start;
           gap: 10px;
@@ -293,6 +716,19 @@
         .play-button {
           width: 100%;
           justify-content: center;
+        }
+
+        .instruments-row {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .fretboard-scale {
+          min-width: 500px;
+        }
+
+        .keyboard-scale {
+          min-width: 400px;
         }
       }
     </style>
@@ -311,6 +747,22 @@
             Select 3 or more notes to see matching scales
           </div>
         </div>
+      </div>
+
+      </div>
+
+    <!-- Instrument Visualizations -->
+    <div class="instrument-section" id="guitarSection">
+      <h3 class="instrument-header">🎸 Guitar Fretboard</h3>
+      <div class="guitar-fretboard">
+        <div class="fretboard" id="fretboard"></div>
+      </div>
+    </div>
+
+    <div class="instrument-section" id="pianoSection">
+      <h3 class="instrument-header">🎹 Piano Keyboard</h3>
+      <div class="piano-keyboard">
+        <div class="keyboard" id="keyboard"></div>
       </div>
     </div>
 
@@ -494,15 +946,38 @@
               ? "scale-item selected"
               : "scale-item";
 
+            // Add instrument sections inside selected scale
+            const instrumentSections = isSelectedScale ? `
+              <div class="scale-instruments">
+                <div class="instruments-row">
+                  <div class="instrument-wrapper">
+                    <div class="instrument-header-scale">🎸 Guitar</div>
+                    <div class="guitar-fretboard-scale">
+                      <div class="fretboard-scale" id="fretboard-${index}"></div>
+                    </div>
+                  </div>
+                  <div class="instrument-wrapper">
+                    <div class="instrument-header-scale">🎹 Piano</div>
+                    <div class="piano-keyboard-scale">
+                      <div class="keyboard-scale" id="keyboard-${index}"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ` : '';
+
             return `
                     <div class="${scaleClass}" onclick="selectScale(event, ${index})">
-                        <div class="scale-info">
-                            <div class="scale-name">${scale.name}</div>
-                            <div class="scale-notes">${notesHTML}</div>
+                        <div class="scale-content">
+                            <div class="scale-info">
+                                <div class="scale-name">${scale.name}</div>
+                                <div class="scale-notes">${notesHTML}</div>
+                            </div>
+                            <button class="${buttonClass}" onclick="event.stopPropagation(); ${buttonAction}">
+                                ${buttonText}
+                            </button>
                         </div>
-                        <button class="${buttonClass}" onclick="event.stopPropagation(); ${buttonAction}">
-                            ${buttonText}
-                        </button>
+                        ${instrumentSections}
                     </div>
                 `;
           })
@@ -510,6 +985,9 @@
 
         // Store matches for playback
         window.currentMatches = matches;
+
+        // Update instrument visualizations
+        updateInstrumentVisualizations();
       }
 
       // Play a scale
@@ -581,6 +1059,7 @@
 
         selectedScaleIndex = index;
         updateScales();
+        updateInstrumentVisualizations();
       }
 
       // Handle keyboard shortcuts
@@ -744,6 +1223,190 @@
       // Sleep utility
       function sleep(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      // Guitar fretboard rendering
+      function renderGuitarFretboard(scaleNotes, scaleIndex) {
+        const fretboard = document.getElementById(`fretboard-${scaleIndex}`);
+        if (!fretboard) return;
+
+        fretboard.innerHTML = '';
+
+        // Standard guitar tuning (low to high)
+        const tuning = ['E', 'A', 'D', 'G', 'B', 'E'];
+        const numFrets = 12;
+
+        // Create container for fretboard
+        const fretboardContainer = document.createElement('div');
+        fretboardContainer.style.position = 'relative';
+
+        // Add fret numbers above the fretboard
+        const fretNumberRow = document.createElement('div');
+        fretNumberRow.style.display = 'flex';
+        fretNumberRow.style.marginBottom = '8px';
+
+        // Add fret 0 position
+        const fretZero = document.createElement('div');
+        fretZero.style.flex = '1';
+        fretZero.style.minWidth = '45px';
+        fretZero.style.display = 'flex';
+        fretZero.style.alignItems = 'center';
+        fretZero.style.justifyContent = 'center';
+        fretZero.textContent = '0';
+        fretZero.style.fontSize = '0.7rem';
+        fretZero.style.fontWeight = '600';
+        fretZero.style.color = 'var(--text-secondary)';
+        fretNumberRow.appendChild(fretZero);
+
+        for (let fret = 1; fret <= numFrets; fret++) {
+          const fretNumberCell = document.createElement('div');
+          fretNumberCell.style.flex = '1';
+          fretNumberCell.style.minWidth = '45px';
+          fretNumberCell.style.display = 'flex';
+          fretNumberCell.style.justifyContent = 'center';
+          fretNumberCell.style.alignItems = 'center';
+          fretNumberCell.style.fontSize = '0.7rem';
+          fretNumberCell.style.fontWeight = '600';
+          fretNumberCell.style.color = 'var(--text-secondary)';
+          fretNumberCell.textContent = fret;
+
+          fretNumberRow.appendChild(fretNumberCell);
+        }
+
+        fretboard.appendChild(fretNumberRow);
+
+        // Create strings
+        tuning.forEach((openNote, stringIndex) => {
+          const string = document.createElement('div');
+          string.className = 'string';
+
+          // String line
+          const stringLine = document.createElement('div');
+          stringLine.className = 'string-line';
+          stringLine.style.left = '0px'; // Remove space for string labels
+          string.appendChild(stringLine);
+
+          // Add open position (fret 0)
+          const openFretElement = document.createElement('div');
+          openFretElement.className = 'fret';
+          openFretElement.style.minWidth = '45px';
+          openFretElement.style.borderRight = '2px solid var(--border-color)';
+
+          // Calculate note for open string
+          const openNoteIndex = getNoteIndex(openNote);
+          const note = NOTES[openNoteIndex];
+
+          // Add note marker for open string
+          const openNoteMarker = document.createElement('div');
+          openNoteMarker.className = scaleNotes.includes(note) ? 'note-marker in-scale' : 'note-marker';
+          openNoteMarker.textContent = note;
+          openNoteMarker.onclick = () => playNoteClick({ target: openNoteMarker }, note);
+          openFretElement.appendChild(openNoteMarker);
+
+          string.appendChild(openFretElement);
+
+          // Add frets 1-12
+          for (let fret = 1; fret <= numFrets; fret++) {
+            const fretElement = document.createElement('div');
+            fretElement.className = 'fret';
+
+            // Highlight double fret positions
+            if ([3, 5, 7, 9, 12].includes(fret)) {
+              fretElement.style.borderRightWidth = '3px';
+              fretElement.style.borderRightColor = '#999';
+            }
+
+            // Calculate note at this fret
+            const noteIndex = (openNoteIndex + fret) % 12;
+            const fretNote = NOTES[noteIndex];
+
+            // Add note marker
+            const noteMarker = document.createElement('div');
+            noteMarker.className = scaleNotes.includes(fretNote) ? 'note-marker in-scale' : 'note-marker';
+            noteMarker.textContent = fretNote;
+            noteMarker.onclick = () => playNoteClick({ target: noteMarker }, fretNote);
+            fretElement.appendChild(noteMarker);
+
+            string.appendChild(fretElement);
+          }
+
+          fretboardContainer.appendChild(string);
+        });
+
+        fretboard.appendChild(fretboardContainer);
+      }
+
+      // Piano keyboard rendering
+      function renderPianoKeyboard(scaleNotes, scaleIndex) {
+        const keyboard = document.getElementById(`keyboard-${scaleIndex}`);
+        if (!keyboard) return;
+
+        keyboard.innerHTML = '';
+
+        // Create one octave
+        const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const blackKeys = ['C#', 'D#', null, 'F#', 'G#', 'A#'];
+        // Precise black key positions between white keys
+        const blackKeyPositions = [0.85, 1.85, 3.85, 4.85, 5.85]; // More accurate positioning
+
+        // Create white keys
+        whiteKeys.forEach((note, index) => {
+          const key = document.createElement('div');
+          key.className = 'key white-key';
+
+          if (scaleNotes.includes(note)) {
+            key.classList.add('in-scale');
+          }
+
+          const label = document.createElement('div');
+          label.className = 'key-label';
+          label.textContent = note;
+          key.appendChild(label);
+
+          key.onclick = () => playNoteClick({ target: key }, note);
+          keyboard.appendChild(key);
+        });
+
+        // Create black keys (positioned absolutely)
+        blackKeyPositions.forEach((position, index) => {
+          if (blackKeys[index]) {
+            const blackKey = document.createElement('div');
+            blackKey.className = 'key black-key';
+            const note = blackKeys[index];
+
+            // Position black keys precisely between white keys
+            // C# between C-D, D# between D-E, F# between F-G, G# between G-A, A# between A-B
+            const whiteKeyWidth = keyboard.offsetWidth / 7; // Total width divided by 7 white keys
+            blackKey.style.left = `${(position * whiteKeyWidth) - 8}px`; // Move 28px black key a bit right
+
+            if (scaleNotes.includes(note)) {
+              blackKey.classList.add('in-scale');
+            }
+
+            const label = document.createElement('div');
+            label.className = 'key-label';
+            label.textContent = note;
+            blackKey.appendChild(label);
+
+            blackKey.onclick = () => playNoteClick({ target: blackKey }, note);
+            keyboard.appendChild(blackKey);
+          }
+        });
+      }
+
+      // Update instrument visualizations
+      function updateInstrumentVisualizations() {
+        const matches = findMatchingScales();
+        const hasSelectedScale = selectedScaleIndex !== null && matches.length > selectedScaleIndex;
+
+        if (hasSelectedScale) {
+          const selectedScale = matches[selectedScaleIndex];
+          const scaleNotes = selectedScale.notes;
+
+          // Render instruments in the scale-specific containers
+          renderGuitarFretboard(scaleNotes, selectedScaleIndex);
+          renderPianoKeyboard(scaleNotes, selectedScaleIndex);
+        }
       }
 
       // Initialize
