@@ -910,6 +910,23 @@
         B: 493.88,
       };
 
+      // Function to get frequency with octave
+      function getFrequencyWithOctave(note, octave) {
+        const baseFreq = NOTE_FREQUENCIES[note];
+        const octaveShift = octave - 4; // A4 is reference (octave 4)
+        return baseFreq * Math.pow(2, octaveShift);
+      }
+
+      // Guitar string frequencies with correct octaves (standard tuning E-A-D-G-B-E)
+      const GUITAR_STRING_FREQUENCIES = [
+        { note: 'E', octave: 4, frequency: 329.63 }, // High E (1st string)
+        { note: 'B', octave: 3, frequency: 246.94 }, // B (2nd string)
+        { note: 'G', octave: 3, frequency: 196.00 }, // G (3rd string)
+        { note: 'D', octave: 3, frequency: 146.83 }, // D (4th string)
+        { note: 'A', octave: 2, frequency: 110.00 }, // A (5th string)
+        { note: 'E', octave: 2, frequency: 82.41 },  // Low E (6th string)
+      ];
+
       let selectedNotes = new Set();
       let audioContext = null;
       let currentlyPlayingIndex = null;
@@ -1195,6 +1212,73 @@
         await playNote(note, 0.4);
       }
 
+      // Play a guitar note with correct octave
+      async function playGuitarNote(event, note, stringIndex, fretNumber) {
+        initAudioContext();
+        const marker = event.target;
+
+        // Add click animation
+        marker.classList.add("clicked");
+        setTimeout(() => marker.classList.remove("clicked"), 300);
+
+        // Calculate frequency based on string and fret
+        const stringData = GUITAR_STRING_FREQUENCIES[stringIndex];
+        const frequency = stringData.frequency * Math.pow(2, fretNumber / 12);
+
+        // Play the note with calculated frequency
+        await playNoteWithFrequency(frequency, 0.4);
+      }
+
+      // Play a note with custom frequency
+      function playNoteWithFrequency(frequency, duration) {
+        return new Promise((resolve) => {
+          const now = audioContext.currentTime;
+
+          // Create main oscillator (fundamental)
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+
+          // Guitar-like envelope
+          const attackTime = 0.002; // Slightly slower attack than piano
+          const decayTime = 0.2;    // Initial decay
+          const sustainLevel = 0.3; // Sustain level
+          const releaseTime = Math.max(0.1, duration - 0.3);
+
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+
+          // Use a mix of sawtooth and sine for guitar-like tone
+          oscillator.type = "sawtooth";
+          oscillator.frequency.value = frequency;
+
+          // Guitar envelope
+          gainNode.gain.setValueAtTime(0, now);
+          gainNode.gain.linearRampToValueAtTime(0.3, now + attackTime);
+          gainNode.gain.exponentialRampToValueAtTime(sustainLevel, now + decayTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+          // Add slight vibrato for natural sound
+          const vibrato = audioContext.createOscillator();
+          const vibratoGain = audioContext.createGain();
+
+          vibrato.frequency.value = 3; // 3Hz vibrato
+          vibratoGain.gain.value = 1; // 1 cent vibrato depth
+
+          vibrato.connect(vibratoGain);
+          vibratoGain.connect(oscillator.frequency);
+
+          // Start sound
+          oscillator.start(now);
+          vibrato.start(now);
+
+          // Stop sound
+          oscillator.stop(now + duration);
+          vibrato.stop(now + duration);
+
+          oscillator.onended = resolve;
+        });
+      }
+
       // Select a scale for keyboard shortcuts
       function selectScale(event, index) {
         // Don't select if clicking on a note badge
@@ -1445,7 +1529,7 @@
           const openNoteMarker = document.createElement('div');
           openNoteMarker.className = scaleNotes.includes(note) ? 'note-marker in-scale' : 'note-marker';
           openNoteMarker.textContent = note;
-          openNoteMarker.onclick = () => playNoteClick({ target: openNoteMarker }, note);
+          openNoteMarker.onclick = () => playGuitarNote({ target: openNoteMarker }, note, stringIndex, 0);
           openFretElement.appendChild(openNoteMarker);
 
           string.appendChild(openFretElement);
@@ -1469,7 +1553,7 @@
             const noteMarker = document.createElement('div');
             noteMarker.className = scaleNotes.includes(fretNote) ? 'note-marker in-scale' : 'note-marker';
             noteMarker.textContent = fretNote;
-            noteMarker.onclick = () => playNoteClick({ target: noteMarker }, fretNote);
+            noteMarker.onclick = () => playGuitarNote({ target: noteMarker }, fretNote, stringIndex, fret);
             fretElement.appendChild(noteMarker);
 
             string.appendChild(fretElement);
