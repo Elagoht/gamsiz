@@ -31,6 +31,14 @@
           --play-btn-bg: #2196f3;
           --play-btn-hover: #1976d2;
         }
+
+        .piano-selector .white-key {
+          color: #000000;
+        }
+
+        .piano-selector .white-key.selected {
+          color: white;
+        }
       }
 
       * {
@@ -66,40 +74,109 @@
         font-size: 0.95rem;
       }
 
-      .note-grid {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 10px;
-        margin-bottom: 30px;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .note-button {
-        aspect-ratio: 1;
+      .piano-selector {
+        background-color: var(--bg-secondary);
         border: 2px solid var(--border-color);
-        border-radius: 8px;
-        background-color: var(--bg-note);
-        color: var(--text-primary);
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        width: 100%;
+      }
+
+      .piano-selector-keyboard {
         display: flex;
-        align-items: center;
+        width: 100%;
+        height: 140px;
+        position: relative;
+      }
+
+      .piano-selector .key {
+        position: relative;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .piano-selector .white-key {
+        flex: 1;
+        height: 140px;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0 0 6px 6px;
+        display: flex;
+        align-items: flex-end;
         justify-content: center;
+        padding-bottom: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        z-index: 1;
+        margin: 0 1px;
       }
 
-      .note-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px var(--shadow);
+      .piano-selector .white-key:hover {
+        background-color: #f0f0f0;
       }
 
-      .note-button.active {
+      .piano-selector .white-key.selected {
         background-color: var(--bg-note-active);
         color: white;
         border-color: var(--bg-note-active);
+      }
+
+      .piano-selector .white-key.selected:hover {
+        background-color: #45a049;
+      }
+
+      .piano-selector .black-key {
+        width: 55px;
+        height: 90px;
+        background-color: #333;
+        border-radius: 0 0 4px 4px;
+        position: absolute;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .piano-selector .black-key:hover {
+        background-color: #555;
+      }
+
+      .piano-selector .black-key.selected {
+        background-color: #2e7d32;
+      }
+
+      .piano-selector .black-key.selected:hover {
+        background-color: #1b5e20;
+      }
+
+      .piano-selector .key-label {
+        pointer-events: none;
+        user-select: none;
+      }
+
+      @media (max-width: 600px) {
+        .piano-selector-keyboard {
+          height: 100px;
+        }
+
+        .piano-selector .white-key {
+          height: 100px;
+          font-size: 0.75rem;
+          padding-bottom: 8px;
+        }
+
+        .piano-selector .black-key {
+          width: 45px;
+          height: 65px;
+          font-size: 0.6rem;
+          padding-bottom: 5px;
+        }
       }
 
       .scales-section {
@@ -689,11 +766,11 @@
       }
 
       .keyboard-scale .black-key.in-scale {
-        background-color: #2196f3;
+        background-color: #2e7d32;
       }
 
       .keyboard-scale .black-key.in-scale:hover {
-        background-color: #1976d2;
+        background-color: #1b5e20;
       }
 
       @media (max-width: 600px) {
@@ -753,7 +830,9 @@
       <h1>Musical Scale Finder</h1>
       <p class="subtitle">Select at least 3 notes to find matching scales</p>
 
-      <div class="note-grid" id="noteGrid"></div>
+      <div class="piano-selector">
+        <div class="piano-selector-keyboard" id="pianoSelector"></div>
+      </div>
 
       <div class="scales-section" id="scalesSection">
         <h2 class="scales-header">Matching Scales</h2>
@@ -845,31 +924,82 @@
         }
       }
 
-      // Create note grid
-      function createNoteGrid() {
-        const noteGrid = document.getElementById("noteGrid");
-        NOTES.forEach((note) => {
-          const button = document.createElement("button");
-          button.className = "note-button";
-          button.textContent = note;
-          button.dataset.note = note;
-          button.addEventListener("click", toggleNote);
-          noteGrid.appendChild(button);
+      // Create piano selector keyboard
+      function createPianoSelector() {
+        const pianoSelector = document.getElementById("pianoSelector");
+
+        // Define white keys and black keys layout
+        const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const blackKeysMap = [
+          { note: 'C#', between: [0, 1] }, // Between C and D
+          { note: 'D#', between: [1, 2] }, // Between D and E
+          { note: 'F#', between: [3, 4] }, // Between F and G
+          { note: 'G#', between: [4, 5] }, // Between G and A
+          { note: 'A#', between: [5, 6] }, // Between A and B
+        ];
+
+        // Create white keys
+        whiteKeys.forEach((note, index) => {
+          const key = document.createElement('div');
+          key.className = 'key white-key';
+          key.dataset.note = note;
+
+          const label = document.createElement('div');
+          label.className = 'key-label';
+          label.textContent = note;
+          key.appendChild(label);
+
+          key.addEventListener("click", toggleNote);
+          pianoSelector.appendChild(key);
         });
+
+        // Create black keys (positioned absolutely)
+        setTimeout(() => {
+          const whiteKeyElements = pianoSelector.querySelectorAll('.white-key');
+          const blackKeyWidth = window.innerWidth <= 600 ? 45 : 55;
+
+          blackKeysMap.forEach((blackKeyData) => {
+            const blackKey = document.createElement('div');
+            blackKey.className = 'key black-key';
+            blackKey.dataset.note = blackKeyData.note;
+
+            // Get the white keys this black key sits between
+            const leftWhiteKey = whiteKeyElements[blackKeyData.between[0]];
+            const rightWhiteKey = whiteKeyElements[blackKeyData.between[1]];
+
+            if (leftWhiteKey && rightWhiteKey) {
+              const leftPosition = leftWhiteKey.offsetLeft;
+              const whiteKeyWidth = leftWhiteKey.offsetWidth;
+
+              // Position the black key so it overlaps slightly with both adjacent white keys
+              const blackKeyPosition = leftPosition + whiteKeyWidth - (blackKeyWidth / 2);
+
+              blackKey.style.left = `${blackKeyPosition}px`;
+            }
+
+            const label = document.createElement('div');
+            label.className = 'key-label';
+            label.textContent = blackKeyData.note;
+            blackKey.appendChild(label);
+
+            blackKey.addEventListener("click", toggleNote);
+            pianoSelector.appendChild(blackKey);
+          });
+        }, 0);
       }
 
       // Toggle note selection
       function toggleNote(event) {
         initAudioContext();
-        const note = event.target.dataset.note;
-        const button = event.target;
+        const note = event.currentTarget.dataset.note;
+        const key = event.currentTarget;
 
         if (selectedNotes.has(note)) {
           selectedNotes.delete(note);
-          button.classList.remove("active");
+          key.classList.remove("selected");
         } else {
           selectedNotes.add(note);
-          button.classList.add("active");
+          key.classList.add("selected");
         }
 
         updateScales();
@@ -1445,7 +1575,7 @@
       }
 
       // Initialize
-      createNoteGrid();
+      createPianoSelector();
 
       // Add keyboard event listeners
       document.addEventListener("keypress", handleKeyPress);
